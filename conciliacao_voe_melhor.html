@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conciliação Bancária — Voe Melhor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E4E2DC;
+    --border-light: #EEECE7;
+    --text: #1A1916;
+    --text-2: #6B6860;
+    --text-3: #9E9C96;
+    --teal: #0D7C6E;
+    --teal-light: #E6F4F2;
+    --teal-mid: #B2DDD8;
+    --coral: #C94B2C;
+    --coral-light: #FCEEE9;
+    --green: #2D7A3A;
+    --green-light: #EBF5EC;
+    --green-border: #A3CFAA;
+    --red-border: #F0A090;
+    --mp-bg: #FFF3E0; --mp-text: #8B4A00;
+    --itau-bg: #E8F0FB; --itau-text: #1A4A8A;
+    --jul-bg: #E0F4E8; --jul-text: #155C26;
+    --ago-bg: #FEF9C3; --ago-text: #7A5C00;
+    --combo-border: #9B91D6;
+    --combo-bg: #F4F2FD;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+  header { background: var(--teal); color: #fff; padding: 20px 32px; display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .header-title { font-size: 16px; font-weight: 600; }
+  .header-sub { font-size: 12px; opacity: 0.7; margin-top: 1px; }
+
+  .upload-section { max-width: 860px; margin: 40px auto; padding: 0 24px; }
+  .upload-zone { border: 2px dashed var(--teal-mid); border-radius: 16px; background: var(--teal-light); padding: 48px 32px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--teal); background: #D5EEE9; }
+  .upload-icon { font-size: 40px; margin-bottom: 16px; }
+  .upload-title { font-size: 18px; font-weight: 600; color: var(--teal); margin-bottom: 8px; }
+  .upload-sub { color: var(--text-2); font-size: 13px; margin-bottom: 20px; }
+  .upload-btn { display: inline-block; background: var(--teal); color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: background 0.15s; }
+  .upload-btn:hover { background: #0A6558; }
+  #file-input { display: none; }
+  .abas-info { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; font-size: 12px; color: var(--text-2); }
+  .abas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .aba-item { display: flex; align-items: center; gap: 6px; }
+  .aba-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+
+  #loading { display: none; max-width: 860px; margin: 0 auto; padding: 40px 24px; text-align: center; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text-2); font-size: 14px; }
+
+  #results { display: none; max-width: 960px; margin: 0 auto; padding: 0 24px 48px; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-top: 32px; flex-wrap: wrap; gap: 12px; }
+  .results-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .results-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+  .reset-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-2); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .reset-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; box-shadow: var(--shadow); }
+  .metric-label { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .metric-value { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+  .metric-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .metric.highlight .metric-value { color: var(--teal); }
+
+  .section-title { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.07em; margin: 28px 0 12px; }
+
+  .pair-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .pair-card.combo { border-color: var(--combo-border); background: var(--combo-bg); }
+  .pair-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .pair-id { font-size: 12px; color: var(--text-3); font-weight: 500; }
+  .combo-badge { background: #DDD9F8; color: #3C3489; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 6px; }
+  .nf-badge { background: var(--green-light); color: var(--green); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+
+  .pair-body { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; gap: 8px; align-items: center; }
+  .arrow-col { text-align: center; font-size: 16px; color: var(--text-3); }
+
+  .saida-box { background: var(--coral-light); border: 1px solid var(--red-border); border-radius: 10px; padding: 10px 12px; }
+  .entrada-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: 10px; padding: 10px 12px; }
+  .nf-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; text-align: center; }
+
+  .box-label { font-size: 10px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .saida-box .box-label { color: #8B2020; }
+  .entrada-box .box-label { color: #1E5C2A; }
+  .nf-box .box-label { color: var(--text-2); justify-content: center; }
+
+  .row-item { font-size: 10px; padding: 2px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; line-height: 1.4; }
+  .saida-box .row-item { color: #7A1A1A; }
+  .entrada-box .row-item { color: #1A4D22; }
+  .row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-val { font-weight: 600; white-space: nowrap; }
+
+  .box-total { border-top: 1px solid; margin-top: 6px; padding-top: 6px; font-size: 11px; font-weight: 600; display: flex; justify-content: space-between; }
+  .saida-box .box-total { border-color: var(--red-border); color: #8B2020; }
+  .entrada-box .box-total { border-color: var(--green-border); color: #1E5C2A; }
+  .nf-value { font-size: 16px; font-weight: 700; color: var(--text); margin-top: 4px; }
+  .nf-pct { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+
+  .badge { font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 4px; display: inline-block; vertical-align: middle; margin-right: 2px; }
+  .badge-mp { background: var(--mp-bg); color: var(--mp-text); }
+  .badge-itau { background: var(--itau-bg); color: var(--itau-text); }
+  .badge-jul { background: var(--jul-bg); color: var(--jul-text); }
+  .badge-ago { background: var(--ago-bg); color: var(--ago-text); }
+
+  .pending-card { background: var(--surface); border: 1px solid var(--red-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow); }
+  .pending-name { font-size: 13px; font-weight: 500; }
+  .pending-range { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+  .pending-val { font-size: 14px; font-weight: 600; color: var(--coral); white-space: nowrap; }
+
+  .error-box { background: var(--coral-light); border: 1px solid var(--red-border); border-radius: 12px; padding: 20px; color: var(--coral); font-size: 13px; margin-top: 20px; }
+  .debug-box { background: #f8f8f8; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 11px; font-family: monospace; margin-top: 10px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; color: #444; }
+
+  @media (max-width: 640px) {
+    header { padding: 16px 20px; }
+    .metrics { grid-template-columns: 1fr; }
+    .pair-body { grid-template-columns: 1fr; }
+    .arrow-col { display: none; }
+    .abas-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">✈</div>
+  <div>
+    <div class="header-title">Voe Melhor — Conciliação Bancária</div>
+    <div class="header-sub">Ferramenta offline · roda direto no navegador</div>
+  </div>
+</header>
+
+<div id="upload-section" class="upload-section">
+  <div class="upload-zone" id="drop-zone">
+    <div class="upload-icon">📊</div>
+    <div class="upload-title">Carregue a planilha</div>
+    <div class="upload-sub">Arraste o arquivo aqui ou clique para selecionar</div>
+    <label class="upload-btn" for="file-input">Selecionar arquivo .xlsx</label>
+    <input type="file" id="file-input" accept=".xlsx,.xls">
+  </div>
+  <div class="abas-info">
+    <strong>Abas processadas automaticamente:</strong>
+    <div class="abas-grid" style="margin-top:8px;">
+      <div class="aba-item"><div class="aba-dot"></div> Julho 2026 Mercado Pago</div>
+      <div class="aba-item"><div class="aba-dot"></div> Julho 2026 Itaú</div>
+      <div class="aba-item"><div class="aba-dot"></div> Agosto 2026 Mercado Pago</div>
+      <div class="aba-item"><div class="aba-dot"></div> Agosto 2026 Itaú</div>
+    </div>
+    <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-light);">
+      Linhas <strong>amarelas</strong> (sem laranja) = pendentes. Margem alvo: <strong>8% – 12%</strong>.
+    </div>
+  </div>
+  <div id="upload-error"></div>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Lendo planilha...</div>
+</div>
+
+<div id="results">
+  <div class="results-header">
+    <div>
+      <div class="results-title">Resultado da Conciliação</div>
+      <div class="results-sub" id="results-sub"></div>
+    </div>
+    <button class="reset-btn" onclick="reset()">↩ Nova planilha</button>
+  </div>
+  <div class="metrics" id="metrics"></div>
+  <div id="pairs-section"></div>
+  <div id="pending-section"></div>
+</div>
+
+<script>
+// ─── CONSTANTES ───────────────────────────────────────────────
+const SHEETS = [
+  "Julho 2026 Mercado Pago",
+  "Julho 2026 Itaú",
+  "Agosto 2026 Mercado Pago",
+  "Agosto 2026 Itaú"
+];
+
+// Cores em múltiplos formatos que o SheetJS pode retornar
+const YELLOW_VARIANTS = ['FFFFE599', 'FFE599', 'FFFFFE599'];
+const ORANGE_VARIANTS = ['FFFF9900', 'FF9900', 'FFFFFF9900'];
+
+const TOL_LOW = 0.08, TOL_HIGH = 0.12, MAX_E = 5, MAX_S = 4;
+
+// ─── UPLOAD ───────────────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) { showError('Selecione um arquivo .xlsx ou .xls'); return; }
+  setLoading(true, 'Lendo planilha...');
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellStyles: true });
+      setLoading(true, 'Detectando linhas amarelas...');
+      setTimeout(() => {
+        try {
+          const rows = extractRows(wb);
+          setLoading(true, `${rows.length} linhas encontradas. Calculando pares...`);
+          setTimeout(() => {
+            try {
+              const result = runMatching(rows);
+              setLoading(false);
+              renderResults(result, file.name);
+            } catch(err) { showError('Erro no matching: ' + err.message, err.stack); setLoading(false); }
+          }, 80);
+        } catch(err) { showError('Erro ao extrair linhas: ' + err.message, err.stack); setLoading(false); }
+      }, 80);
+    } catch(err) { showError('Erro ao ler arquivo: ' + err.message, err.stack); setLoading(false); }
+  };
+  reader.onerror = () => showError('Falha ao ler o arquivo.');
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── EXTRAÇÃO DE LINHAS ───────────────────────────────────────
+function normalizeRGB(rgb) {
+  if (!rgb) return null;
+  // Remove # se houver
+  rgb = String(rgb).replace('#','').toUpperCase();
+  // Remove zeros à frente de transparência (FF = opaco)
+  // Formatos possíveis: AARRGGBB (8 chars) ou RRGGBB (6 chars)
+  return rgb;
+}
+
+function isYellowColor(rgb) {
+  const n = normalizeRGB(rgb);
+  if (!n) return false;
+  // FFE599 é o amarelo (pode vir como FFFFE599 com canal alpha)
+  return n === 'FFFFE599' || n === 'FFE599' || n.endsWith('FFE599');
+}
+
+function isOrangeColor(rgb) {
+  const n = normalizeRGB(rgb);
+  if (!n) return false;
+  return n === 'FFFF9900' || n === 'FF9900' || n.endsWith('FF9900');
+}
+
+function extractRows(wb) {
+  const allRows = [];
+
+  for (const shName of SHEETS) {
+    const ws = wb.Sheets[shName];
+    if (!ws) continue;
+
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+    const bank = shName.includes('Mercado') ? 'MP' : 'Itaú';
+    const month = shName.includes('Julho') ? 'Jul' : 'Ago';
+
+    for (let r = 5; r <= range.e.r; r++) { // linha 6 = índice 5
+      let isYellow = false, isOrange = false;
+
+      // Verifica cor nas primeiras 7 colunas
+      for (let c = 0; c <= 6; c++) {
+        const addr = XLSX.utils.encode_cell({ r, c });
+        const cell = ws[addr];
+        if (!cell || !cell.s) continue;
+
+        // SheetJS pode colocar a cor em s.fgColor ou s.bgColor ou s.patternColor
+        const sources = [
+          cell.s.fgColor,
+          cell.s.bgColor,
+          cell.s.patternColor
+        ];
+
+        for (const src of sources) {
+          if (!src) continue;
+          const rgb = src.rgb || src.argb || src.theme;
+          if (!rgb || typeof rgb !== 'string') continue;
+          if (isYellowColor(rgb)) isYellow = true;
+          if (isOrangeColor(rgb)) isOrange = true;
+        }
+      }
+
+      if (!isYellow || isOrange) continue;
+
+      // Lê o valor numérico — procura nas colunas C(2), D(3), E(4)
+      // A planilha tem: col A=data, B=cliente, C=histórico, D=valor
+      let value = null;
+      let client = '';
+      let dateStr = '';
+
+      // Coluna A: data
+      const dateCell = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+      if (dateCell) {
+        if (dateCell.t === 'n' && dateCell.v) {
+          try {
+            const parsed = XLSX.SSF.parse_date_code(dateCell.v);
+            if (parsed) dateStr = `${String(parsed.d).padStart(2,'0')}/${String(parsed.m).padStart(2,'0')}/${parsed.y}`;
+          } catch(e) {}
+        } else if (dateCell.w) {
+          dateStr = dateCell.w.slice(0, 10);
+        } else if (dateCell.v) {
+          dateStr = String(dateCell.v).slice(0, 10);
+        }
+      }
+
+      // Coluna B: cliente/nome
+      const nameCell = ws[XLSX.utils.encode_cell({ r, c: 1 })];
+      if (nameCell && nameCell.v != null) client = String(nameCell.v);
+
+      // Procura valor numérico nas colunas C, D, E (índices 2, 3, 4)
+      for (const c of [3, 2, 4]) {
+        const valCell = ws[XLSX.utils.encode_cell({ r, c })];
+        if (!valCell || valCell.v == null) continue;
+        const v = parseFloat(valCell.v);
+        if (!isNaN(v) && v !== 0) { value = v; break; }
+      }
+
+      if (value === null) continue;
+
+      allRows.push({
+        row: r + 1,
+        sheet: shName,
+        bank,
+        month,
+        bm: `${month}/${bank}`,
+        date: dateStr,
+        client,
+        value
+      });
+    }
+  }
+
+  return allRows;
+}
+
+// ─── ALGORITMO DE MATCHING ────────────────────────────────────
+function* combinations(n, k) {
+  const idx = Array.from({ length: k }, (_, i) => i);
+  while (true) {
+    yield [...idx];
+    let i = k - 1;
+    while (i >= 0 && idx[i] === n - k + i) i--;
+    if (i < 0) break;
+    idx[i]++;
+    for (let j = i + 1; j < k; j++) idx[j] = idx[j - 1] + 1;
+  }
+}
+
+function findBestMatch(saidasCombo, availEntradas) {
+  const sTotal = saidasCombo.reduce((s, r) => s + Math.abs(r.value), 0);
+  const minVal = sTotal * (1 + TOL_LOW);
+  const maxVal = sTotal * (1 + TOL_HIGH);
+  let best = null;
+
+  const n = availEntradas.length;
+  for (let k = 1; k <= Math.min(MAX_E, n); k++) {
+    for (const combo of combinations(n, k)) {
+      const total = combo.reduce((s, i) => s + availEntradas[i].value, 0);
+      if (total >= minVal && total <= maxVal) {
+        const lucro = total - sTotal;
+        const pct = (lucro / sTotal) * 100;
+        if (!best || k < best.n || (k === best.n && Math.abs(pct - 10) < Math.abs(best.pct - 10))) {
+          best = { indices: combo, totalE: total, totalS: sTotal, lucro, pct, n: k };
+        }
+      }
+    }
+    if (best && best.n === k) break;
+  }
+  return best;
+}
+
+function runMatching(allRows) {
+  const saidas = allRows.filter(r => r.value < 0);
+  const entradas = allRows.filter(r => r.value > 0);
+
+  const usedS = new Set();
+  const usedE = new Set();
+  const matched = [];
+
+  // Passo 1: 1 saída → N entradas
+  for (let si = 0; si < saidas.length; si++) {
+    const availIdx = entradas.map((_, i) => i).filter(i => !usedE.has(i));
+    const avail = availIdx.map(i => entradas[i]);
+    const best = findBestMatch([saidas[si]], avail);
+    if (best) {
+      const globalE = best.indices.map(li => availIdx[li]);
+      matched.push({
+        saidas: [saidas[si]],
+        entradas: globalE.map(i => entradas[i]),
+        totalS: best.totalS, totalE: best.totalE,
+        lucro: best.lucro, pct: best.pct, combo: false
+      });
+      usedS.add(si);
+      globalE.forEach(i => usedE.add(i));
+    }
+  }
+
+  // Passo 2: N saídas combinadas → N entradas
+  let found = true;
+  while (found) {
+    found = false;
+    const remaining = saidas.map((_, i) => i).filter(i => !usedS.has(i));
+    outer:
+    for (let ns = 2; ns <= MAX_S; ns++) {
+      if (remaining.length < ns) continue;
+      for (const sCombo of combinations(remaining.length, ns)) {
+        const sIdx = sCombo.map(i => remaining[i]);
+        const saidasCombo = sIdx.map(i => saidas[i]);
+        const availIdx = entradas.map((_, i) => i).filter(i => !usedE.has(i));
+        const avail = availIdx.map(i => entradas[i]);
+        const best = findBestMatch(saidasCombo, avail);
+        if (best) {
+          const globalE = best.indices.map(li => availIdx[li]);
+          matched.push({
+            saidas: saidasCombo,
+            entradas: globalE.map(i => entradas[i]),
+            totalS: best.totalS, totalE: best.totalE,
+            lucro: best.lucro, pct: best.pct, combo: true
+          });
+          sIdx.forEach(i => usedS.add(i));
+          globalE.forEach(i => usedE.add(i));
+          found = true;
+          break outer;
+        }
+      }
+    }
+  }
+
+  const unmatched = saidas.filter((_, i) => !usedS.has(i));
+  const totalNF = matched.reduce((s, m) => s + m.lucro, 0);
+  return { matched, unmatched, totalNF, saidas, entradas };
+}
+
+// ─── RENDER ───────────────────────────────────────────────────
+function badge(bm) {
+  const [month, bank] = bm.split('/');
+  const mCls = month === 'Jul' ? 'badge-jul' : 'badge-ago';
+  const bCls = bank === 'MP' ? 'badge-mp' : 'badge-itau';
+  return `<span class="badge ${mCls}">${month}</span><span class="badge ${bCls}">${bank}</span>`;
+}
+
+function fmtBRL(v) {
+  return 'R$\u00a0' + Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderResults({ matched, unmatched, totalNF, saidas, entradas }, fileName) {
+  document.getElementById('results-sub').textContent =
+    fileName + ' · ' + new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric highlight">
+      <div class="metric-label">✅ Pares encontrados</div>
+      <div class="metric-value">${matched.length}</div>
+      <div class="metric-sub">de ${saidas.length} saídas · ${entradas.length} entradas</div>
+    </div>
+    <div class="metric highlight">
+      <div class="metric-label">🧾 Total em NFs</div>
+      <div class="metric-value">${fmtBRL(totalNF)}</div>
+      <div class="metric-sub">a emitir</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">⚠️ Sem par</div>
+      <div class="metric-value">${unmatched.length}</div>
+      <div class="metric-sub">saídas pendentes</div>
+    </div>`;
+
+  // Pares
+  let pairsHtml = matched.length === 0
+    ? '<p style="color:var(--text-2);font-size:13px;padding:12px 0;">Nenhum par encontrado com as entradas disponíveis.</p>'
+    : '<div class="section-title">Pares conciliados — notas fiscais a emitir</div>';
+
+  matched.forEach((m, idx) => {
+    const isCombo = m.combo;
+    const sLabel = isCombo
+      ? `Par ${idx+1}`
+      : `Par ${idx+1} · ${m.saidas[0].bm} linha ${m.saidas[0].row} · ${m.saidas[0].date}`;
+
+    const saidasRows = m.saidas.map(s =>
+      `<div class="row-item">
+        <span class="row-name">${isCombo ? badge(s.bm) : ''}${s.client}</span>
+        <span class="row-val">${fmtBRL(s.value)}</span>
+      </div>`).join('');
+
+    const entradasRows = m.entradas.map(e =>
+      `<div class="row-item">
+        <span class="row-name">${badge(e.bm)}${e.client}</span>
+        <span class="row-val">${fmtBRL(e.value)}</span>
+      </div>`).join('');
+
+    pairsHtml += `
+      <div class="pair-card ${isCombo ? 'combo' : ''}">
+        <div class="pair-header">
+          <span class="pair-id">${sLabel}${isCombo ? '<span class="combo-badge">combo saídas</span>' : ''}</span>
+          <span class="nf-badge">NF ${fmtBRL(m.lucro)}</span>
+        </div>
+        <div class="pair-body">
+          <div class="saida-box">
+            <div class="box-label">${isCombo ? 'Saídas combinadas' : badge(m.saidas[0].bm) + ' Saída'}</div>
+            ${saidasRows}
+            <div class="box-total"><span>Total</span><span>${fmtBRL(m.totalS)}</span></div>
+          </div>
+          <div class="arrow-col">→</div>
+          <div class="entrada-box">
+            <div class="box-label">Entradas</div>
+            ${entradasRows}
+            <div class="box-total"><span>Total</span><span>${fmtBRL(m.totalE)}</span></div>
+          </div>
+          <div class="arrow-col">→</div>
+          <div class="nf-box">
+            <div class="box-label">Lucro (NF)</div>
+            <div class="nf-value">${fmtBRL(m.lucro)}</div>
+            <div class="nf-pct">${m.pct.toFixed(1)}%</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('pairs-section').innerHTML = pairsHtml;
+
+  // Pendentes
+  let pendingHtml = '';
+  if (unmatched.length > 0) {
+    pendingHtml = '<div class="section-title">Saídas sem par — entradas ainda não identificadas</div>';
+    unmatched.forEach(s => {
+      const v = Math.abs(s.value);
+      pendingHtml += `
+        <div class="pending-card">
+          <div>
+            <div class="pending-name">${badge(s.bm)} Linha ${s.row} · ${s.client} · ${s.date}</div>
+            <div class="pending-range">Entrada esperada entre ${fmtBRL(v * (1 + TOL_LOW))} e ${fmtBRL(v * (1 + TOL_HIGH))}</div>
+          </div>
+          <div class="pending-val">– ${fmtBRL(v)}</div>
+        </div>`;
+    });
+  }
+  document.getElementById('pending-section').innerHTML = pendingHtml;
+
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+function setLoading(show, text) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+  document.getElementById('upload-section').style.display = show ? 'none' : 'block';
+  if (text) document.getElementById('loading-text').textContent = text;
+}
+
+function showError(msg, stack) {
+  let html = `<div class="error-box">⚠️ ${msg}`;
+  if (stack) html += `<div class="debug-box">${stack}</div>`;
+  html += `</div>`;
+  document.getElementById('upload-error').innerHTML = html;
+  setLoading(false);
+}
+
+function reset() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('upload-section').style.display = 'block';
+  document.getElementById('upload-error').innerHTML = '';
+  fileInput.value = '';
+}
+</script>
+</body>
+</html>
