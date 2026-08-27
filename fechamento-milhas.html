@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+  <html lang="pt-BR">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fechamento de Milhas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy: #16233f;
+    --navy-2: #1f335c;
+    --paper: #f6f3ec;
+          --gold: #c8983f;
+          --teal: #2f6e64;
+    --red: #b3492f;
+          --line: #d8d0bd;
+          --ink: #1c1a15;
+    --muted: #756f60;
+}
+  *{box-sizing:border-box;}
+  body{
+        margin:0;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(22,35,63,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    padding: 28px 16px 60px;
+}
+  .wrap{max-width:760px;margin:0 auto;}
+
+  header{margin-bottom:22px;}
+      .brand-eyebrow{
+        font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+}
+  h1{
+        font-family:'Space Grotesk', sans-serif;
+    font-size:30px;
+    margin:4px 0 0;
+    color:var(--navy);
+    letter-spacing:-0.01em;
+}
+
+  .card{
+        background:#fdfcf9;
+        border:1.5px solid var(--navy);
+    border-radius:10px;
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+}
+  .card-head{
+        display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:var(--navy);
+    color:var(--paper);
+    gap:10px;
+    flex-wrap:wrap;
+}
+  .card-head h2{
+        font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    margin:0;
+    letter-spacing:.02em;
+}
+  .card-head .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  .card-body{padding:18px;}
+      .card-note{
+        font-size:12.5px;
+    color:var(--muted);
+    margin:-4px 0 14px;
+    line-height:1.5;
+}
+
+  form.inline{
+        display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+  }
+  .field{
+        display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .field.grow{flex:1 1 220px;}
+  .field label{
+        font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+  .field input, .field select, .field textarea{
+        font-family:'IBM Plex Sans', sans-serif;
+    font-size:14px;
+    padding:9px 10px;
+    border:1.5px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+        color:var(--ink);
+    min-width:120px;
+}
+  .field textarea{
+        width:100%;
+    min-height:140px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    resize:vertical;
+    line-height:1.5;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+        outline:2px solid var(--gold);
+    outline-offset:1px;
+    border-color:var(--gold);
+}
+  .btn{
+        font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:10px 16px;
+    border-radius:6px;
+    border:1.5px solid var(--navy);
+    background:var(--navy);
+    color:var(--paper);
+    cursor:pointer;
+    transition:transform .06s ease, opacity .15s ease;
+    white-space:nowrap;
+}
+  .btn:hover{opacity:.88;}
+  .btn:active{transform:translateY(1px);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--navy);
+  }
+  .btn.big{
+    font-size:13px;
+    padding:13px 20px;
+    background:var(--teal);
+    border-color:var(--teal);
+  }
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  table{
+        width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+  thead th{
+        text-align:left;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:6px 7px;
+    border-bottom:1.5px solid var(--navy);
+  }
+  tbody td{
+        padding:9px 7px;
+    border-bottom:1px dashed var(--line);
+    vertical-align:middle;
+  }
+  tbody tr:hover{background:rgba(200,152,63,0.06);}
+  td.valor{font-family:'IBM Plex Mono', monospace;font-weight:600;color:var(--navy);}
+  .mini-input{
+        width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    padding:5px 6px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fff;
+    }
+  .mini-input.err{border-color:var(--red);background:#fbeae5;}
+
+  .toast{
+        position:fixed;
+    bottom:18px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--navy);
+    color:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:10px 18px;
+    border-radius:6px;
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    z-index:50;
+    max-width:90vw;
+    text-align:center;
+    }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .foot-note{
+        text-align:center;
+    font-size:11px;
+    color:var(--muted);
+    font-family:'IBM Plex Mono',monospace;
+    margin-top:24px;
+    letter-spacing:.04em;
+                 }
+
+  .preview-wrap{margin-top:16px;}
+      .preview-flag{
+        font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    padding:2px 6px;
+    border-radius:4px;
+    background:#fbeae5;
+        color:var(--red);
+    display:inline-block;
+}
+  .preview-actions{
+        display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    margin-top:14px;
+    flex-wrap:wrap;
+}
+  .checkcol{width:30px;text-align:center;}
+  .saved-hint{
+        font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--teal);
+    margin-left:6px;
+    opacity:0;
+    transition:opacity .3s ease;
+}
+  .saved-hint.show{opacity:1;}
+
+  @media (max-width:640px){
+    h1{font-size:24px;}
+    form.inline{flex-direction:column;align-items:stretch;}
+    .field input,.field select{min-width:0;width:100%;}
+    thead{display:none;}
+    tbody tr{display:block;border-bottom:1.5px dashed var(--line);padding:8px 0;}
+    tbody td{display:flex;justify-content:space-between;gap:8px;border-bottom:none;padding:4px 4px;}
+    tbody td::before{content:attr(data-label);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--muted);flex-shrink:0;}
+    .mini-input{text-align:right;}
+      }
+</style>
+      </head>
+      <body>
+      <div class="wrap">
+
+        <header>
+          <div class="brand-eyebrow">Controle diário · milhas aéreas</div>
+          <h1>Fechamento de Milhas</h1>
+  </header>
+
+  <!-- CONFIGURAÇÃO -->
+  <div class="card">
+          <div class="card-head">
+            <h2>Configuração</h2>
+          </div>
+          <div class="card-body">
+            <form class="inline" id="form-config">
+              <div class="field">
+                <label for="config-milheiro">Milheiro negociado (R$)</label>
+                <input type="number" id="config-milheiro" placeholder="15,50" step="0.01" min="0">
+              </div>
+              <div class="field">
+                <label for="config-pix">Chave Pix (opcional)</label>
+                <input type="text" id="config-pix" placeholder="Ex: 07119673696">
+              </div>
+              <span class="saved-hint" id="saved-hint">salvo ✓</span>
+            </form>
+          </div>
+        </div>
+
+        <!-- IMPORTAR EXTRATO COLADO -->
+        <div class="card">
+          <div class="card-head">
+            <h2>Colar extrato do Telegram / WhatsApp</h2>
+      <span class="tag">Leitura automática</span>
+    </div>
+    <div class="card-body">
+      <p class="card-note">Cole abaixo a mensagem (ou várias seguidas) com localizador, quantidade de pontos e milheiro. Se estiver tudo certo, um clique em "Processar extrato" já devolve o relatório pronto pra copiar.</p>
+
+            <div class="field grow">
+              <label for="import-texto">Extrato colado</label>
+              <textarea id="import-texto" placeholder="Localizador: AUMPUV&#10;Pontos: 139.900 * 15.00&#10;Total sem taxas: R$ 2.098,50"></textarea>
+            </div>
+
+            <div class="preview-actions">
+              <button type="button" class="btn secondary" id="btn-limpar-extrato">Limpar</button>
+        <button type="button" class="btn secondary" id="btn-processar-valor">Fechar por valor informado</button>
+              <button type="button" class="btn" id="btn-processar-extrato">Processar extrato</button>
+            </div>
+
+            <div id="preview-wrap" class="preview-wrap" style="display:none;">
+              <p class="card-note" style="margin-top:0;">Algum item precisa de atenção — confira antes de gerar o relatório.</p>
+        <table>
+          <thead>
+            <tr>
+              <th class="checkcol"></th>
+              <th>Localizador</th>
+                    <th>Milhas</th>
+                    <th>Milheiro</th>
+                    <th>Taxas (forn.)</th>
+                    <th>Valor calc.</th>
+                    <th>Conferência</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-body"></tbody>
+              </table>
+              <div class="preview-actions">
+                <button type="button" class="btn secondary" id="btn-cancelar-preview">Cancelar</button>
+          <button type="button" class="btn" id="btn-confirmar-preview">Gerar relatório</button>
+              </div>
+            </div>
+
+            <div id="preview-wrap-valor" class="preview-wrap" style="display:none;">
+              <p class="card-note" style="margin-top:0;">Algum item sem valor identificado — confira antes de gerar o relatório.</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="checkcol"></th>
+                    <th>Localizador</th>
+                    <th>Valor informado</th>
+                    <th>Conferência</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-body-valor"></tbody>
+              </table>
+              <div class="preview-actions">
+                <button type="button" class="btn secondary" id="btn-cancelar-preview-valor">Cancelar</button>
+          <button type="button" class="btn" id="btn-confirmar-preview-valor">Gerar relatório</button>
+              </div>
+            </div>
+
+            <div id="resultado-wrap" class="preview-wrap" style="display:none;">
+              <div class="field grow">
+                <label for="resultado-texto">Relatório pronto</label>
+          <textarea id="resultado-texto" readonly style="min-height:160px;"></textarea>
+              </div>
+              <div class="preview-actions">
+                <button type="button" class="btn big" id="btn-copiar-resultado">📋 Copiar relatório</button>
+        </div>
+      </div>
+    </div>
+        </div>
+
+        <div class="foot-note">Cálculo: (milhas ÷ 1.000) × milheiro negociado + taxas pagas no cartão do fornecedor</div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+
+      <script>
+      (function(){
+        const $ = (id) => document.getElementById(id);
+  const toastEl = $('toast');
+  let toastTimer;
+  function toast(msg){
+        toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toastEl.classList.remove('show'), 2200);
+  }
+
+  function fmtBRL(n){
+        return n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  }
+  function fmtNum(n){
+        return n.toLocaleString('pt-BR');
+  }
+
+  // Interpreta número no formato brasileiro: 150.000 / 15,50 / 2325,00 etc.
+  function parseNumberBR(raw){
+        if(raw === undefined || raw === null) return null;
+    let s = String(raw).trim().replace(/[R$\s]/gi, '');
+          if(s === '') return null;
+          const hasDot = s.includes('.');
+    const hasComma = s.includes(',');
+    if(hasDot && hasComma){
+      s = s.replace(/\./g, '').replace(',', '.');
+        } else if(hasComma){
+      s = s.replace(',', '.');
+    } else if(hasDot){
+      const parts = s.split('.');
+      const last = parts[parts.length-1];
+      if(last.length === 3 && parts.length > 1){
+        s = s.replace(/\./g, '');
+      }
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+
+  let pendingPreview = [];
+  let pendingPreviewValor = [];
+  let savedHintTimer;
+
+  async function loadConfig(){
+    try{
+      const res = await window.storage.get('config', false);
+      const cfg = res ? JSON.parse(res.value) : {};
+      $('config-milheiro').value = cfg.milheiro || '';
+              $('config-pix').value = cfg.pix || '';
+    }catch(e){ /* sem config salva ainda */ }
+  }
+  async function saveConfig(){
+    const cfg = {
+            milheiro: parseFloat($('config-milheiro').value) || null,
+                    pix: $('config-pix').value.trim()
+              };
+    try{
+      await window.storage.set('config', JSON.stringify(cfg), false);
+      $('saved-hint').classList.add('show');
+      clearTimeout(savedHintTimer);
+      savedHintTimer = setTimeout(()=>$('saved-hint').classList.remove('show'), 1500);
+    }catch(e){ toast('Erro ao salvar configuração'); }
+  }
+  function getMilheiroConfigurado(){
+        const v = parseFloat($('config-milheiro').value);
+    return isNaN(v) || v <= 0 ? null : v;
+  }
+  function getPixConfigurado(){
+        return $('config-pix').value.trim();
+  }
+
+  $('config-milheiro').addEventListener('change', saveConfig);
+  $('config-pix').addEventListener('change', saveConfig);
+
+  function escapeHtml(str){
+        const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+          return div.innerHTML;
+  }
+
+  // ---------- IMPORTAÇÃO / PARSER DE EXTRATO ----------
+
+  function splitBlocks(text){
+        let blocks = text.split(/\n\s*\n+/).map(b => b.trim()).filter(Boolean);
+    const totalLocalizadorMentions = (text.match(/localizador/gi) || []).length;
+    if(blocks.length <= 1 && totalLocalizadorMentions > 1){
+      blocks = text.split(/(?=localizador)/i).map(b => b.trim()).filter(Boolean);
+    }
+    return blocks.length ? blocks : [text.trim()];
+  }
+
+  function parseBlock(block){
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+
+    let localizador = null;
+    let quantidade = null;
+    let milheiro = null;
+    let totalSemTaxas = null;
+    let taxas = null;
+    let totalGeral = null;
+
+    lines.forEach(line => {
+            let m;
+
+      if(localizador === null && (m = line.match(/^localizador[:\-\s]*([A-Z0-9]{4,10})/i))){
+        localizador = m[1].trim();
+        return;
+      }
+
+      // Padrão mais confiável: "Pontos: 139.900 * 15.00" — quantidade e milheiro juntos.
+      if((m = line.match(/^pontos[:\-\s]*([\d.,]+)\s*\*\s*([\d.,]+)/i))){
+        quantidade = parseNumberBR(m[1]);
+        milheiro = parseNumberBR(m[2]);
+        return;
+      }
+
+      if(quantidade === null && (m = line.match(/^(?:pontos|milhas|quantidade\s*(?:de)?\s*(?:pontos|milhas)|qtd\.?\s*(?:pontos|milhas)?)[:\-\s]*([\d.,]+)/i))){
+                quantidade = parseNumberBR(m[1]);
+        return;
+      }
+
+      if(milheiro === null && (m = line.match(/^milheiro\b[^\d]*([\d.,]+)/i))){
+        milheiro = parseNumberBR(m[1]);
+        return;
+      }
+
+      if(totalSemTaxas === null && (m = line.match(/^(?:total|valor)\s*sem\s*taxas[:\-\s]*(?:r\$)?\s*([\d.,]+)/i))){
+                totalSemTaxas = parseNumberBR(m[1]);
+                return;
+    }
+
+      if(taxas === null && (m = line.match(/^taxas?[:\-\s]*(?:r\$)?\s*([\d.,]+)/i))){
+        taxas = parseNumberBR(m[1]);
+        return;
+      }
+
+      if(totalGeral === null && (m = line.match(/^(?:total(?:\s*a\s*pagar)?|valor(?:\s*com\s*taxas)?|valor\s*total)[:\-\s]*(?:r\$)?\s*([\d.,]+)/i))){
+                totalGeral = parseNumberBR(m[1]);
+                return;
+  }
+                                                                                        });
+
+    let referencia = null;
+    let referenciaAmbigua = false;
+    if(totalSemTaxas !== null){
+      referencia = totalSemTaxas;
+    } else if(taxas !== null && totalGeral !== null){
+      referencia = totalGeral - taxas;
+    } else if(totalGeral !== null){
+      referencia = totalGeral;
+      referenciaAmbigua = true;
+    }
+
+    // Valor final a pagar por esse item: usa exatamente o que o extrato informou como
+    // total (seja "Total", "Total sem taxas" ou "Valor com taxas") — sem somar nada por
+    // cima, já que cada fornecedor rotula esse campo de um jeito diferente.
+    let valorInformado = null;
+    if(totalGeral !== null){
+      valorInformado = totalGeral;
+    } else if(totalSemTaxas !== null){
+      valorInformado = totalSemTaxas;
+    }
+
+    return {
+            localizador, quantidade, milheiro, taxas,
+            referencia, referenciaAmbigua, valorInformado,
+            raw: block
+      };
+}
+
+  function buildPreviewRow(parsed, index, milheiroConfigurado){
+        // O milheiro configurado no topo manda. O texto do extrato só é usado quando
+    // nada foi configurado; se divergir do configurado, avisa em vez de substituir.
+    const temConfig = milheiroConfigurado !== null && milheiroConfigurado !== undefined;
+    const milheiro = temConfig ? milheiroConfigurado : parsed.milheiro;
+    const quantidade = parsed.quantidade;
+    const valorCalc = (quantidade && milheiro) ? (quantidade/1000)*milheiro : null;
+    let flag = '';
+    if(quantidade === null){
+      flag = 'Não achei a quantidade de pontos — confira manualmente';
+} else if(milheiro === null || milheiro === undefined || isNaN(milheiro)){
+      flag = 'Sem milheiro (nem no texto, nem configurado) — preencha';
+} else if(temConfig && parsed.milheiro !== null && Math.abs(parsed.milheiro - milheiroConfigurado) > 0.005){
+      flag = 'O valor do milheiro está diferente do pré-configurado. Verifique, por favor.';
+} else if(parsed.referencia !== null && valorCalc !== null && Math.abs(parsed.referencia - valorCalc) > 0.02){
+      flag = parsed.referenciaAmbigua
+        ? `Total do extrato (${fmtBRL(parsed.referencia)}) difere do calculado — confira se inclui taxas`
+        : `Total sem taxas do extrato (${fmtBRL(parsed.referencia)}) difere do calculado`;
+}
+    return {
+      index,
+      localizador: parsed.localizador || '',
+      quantidade: quantidade,
+      milheiro: milheiro,
+      taxas: parsed.taxas !== null && parsed.taxas !== undefined ? parsed.taxas : 0,
+      flag,
+      include: quantidade !== null
+};
+}
+
+  // Fechamento pelo valor informado no extrato (soma direta, sem passar pelo milheiro).
+  function buildPreviewRowValor(parsed, index){
+    let flag = '';
+    if(parsed.valorInformado === null){
+      flag = 'Não achei o valor a pagar nesse item — preencha manualmente';
+}
+    return {
+      index,
+      localizador: parsed.localizador || '',
+      valor: parsed.valorInformado,
+      flag,
+      include: parsed.valorInformado !== null
+};
+}
+
+  $('btn-processar-extrato').addEventListener('click', async () => {
+    const text = $('import-texto').value.trim();
+    if(!text){ toast('Cole um extrato primeiro'); return; }
+
+    const milheiroConfigurado = getMilheiroConfigurado();
+    const pix = getPixConfigurado();
+
+    const blocks = splitBlocks(text);
+    const rows = blocks.map((b, i) => buildPreviewRow(parseBlock(b), i, milheiroConfigurado));
+
+    const temAviso = rows.some(r => !!r.flag);
+
+    $('preview-wrap-valor').style.display = 'none';
+    pendingPreviewValor = [];
+
+    if(temAviso){
+      pendingPreview = rows;
+      $('resultado-wrap').style.display = 'none';
+      renderPreview();
+      toast('Confira os itens marcados antes de gerar o relatório');
+      return;
+    }
+
+    await gerarRelatorio(rows, pix);
+    });
+
+  $('btn-processar-valor').addEventListener('click', async () => {
+    const text = $('import-texto').value.trim();
+    if(!text){ toast('Cole um extrato primeiro'); return; }
+
+    const pix = getPixConfigurado();
+    const blocks = splitBlocks(text);
+    const rows = blocks.map((b, i) => buildPreviewRowValor(parseBlock(b), i));
+
+    const temAviso = rows.some(r => !!r.flag);
+
+    $('preview-wrap').style.display = 'none';
+    pendingPreview = [];
+
+    if(temAviso){
+      pendingPreviewValor = rows;
+      $('resultado-wrap').style.display = 'none';
+      renderPreviewValor();
+      toast('Confira os itens marcados antes de gerar o relatório');
+      return;
+    }
+
+    await gerarRelatorioValor(rows, pix);
+    });
+
+  // Tenta copiar via Clipboard API moderna; se for bloqueada (comum em arquivos
+  // abertos localmente com file://), cai pro método antigo via execCommand,
+  // que funciona em bem mais navegadores/contextos.
+  async function copiarTexto(texto){
+    try{
+      await navigator.clipboard.writeText(texto);
+      return true;
+}catch(e){
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = texto;
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+}catch(e2){
+        return false;
+}
+}
+}
+
+  async function gerarRelatorio(rows, pix){
+    const textoFornecedor = formatFornecedorReport(rows.map(r => ({
+      localizador: r.localizador, quantidade: r.quantidade, milheiro: r.milheiro, taxas: r.taxas || 0
+})), pix);
+
+    $('resultado-texto').value = textoFornecedor;
+    $('resultado-wrap').style.display = 'block';
+    pendingPreview = [];
+    renderPreview();
+
+    const copiou = await copiarTexto(textoFornecedor);
+    toast(copiou ? 'Relatório copiado' : 'Relatório pronto — clique em "Copiar relatório" abaixo');
+    }
+
+  $('btn-copiar-resultado').addEventListener('click', async () => {
+    const copiou = await copiarTexto($('resultado-texto').value);
+    if(copiou){
+      toast('Relatório copiado');
+} else {
+      $('resultado-texto').select();
+      toast('Não consegui copiar automaticamente — use Ctrl+C');
+}
+});
+
+  function renderPreview(){
+    const wrap = $('preview-wrap');
+    const body = $('preview-body');
+    body.innerHTML = '';
+
+    if(pendingPreview.length === 0){
+      wrap.style.display = 'none';
+      return;
+}
+    wrap.style.display = 'block';
+
+    pendingPreview.forEach(row => {
+      const tr = document.createElement('tr');
+      const taxas = row.taxas || 0;
+      const valor = (row.quantidade && row.milheiro) ? ((row.quantidade/1000)*row.milheiro) + taxas : null;
+      tr.innerHTML = `
+        <td class="checkcol"><input type="checkbox" data-idx="${row.index}" class="chk-include" ${row.include ? 'checked' : ''}></td>
+        <td><input type="text" class="mini-input inp-localizador" data-idx="${row.index}" value="${escapeHtml(row.localizador)}"></td>
+        <td><input type="number" class="mini-input inp-quantidade ${row.quantidade===null?'err':''}" data-idx="${row.index}" value="${row.quantidade !== null ? row.quantidade : ''}"></td>
+        <td><input type="number" step="0.01" class="mini-input inp-milheiro ${(row.milheiro===null||row.milheiro===undefined||isNaN(row.milheiro))?'err':''}" data-idx="${row.index}" value="${row.milheiro !== null && row.milheiro !== undefined ? row.milheiro : ''}"></td>
+        <td><input type="number" step="0.01" class="mini-input inp-taxas" data-idx="${row.index}" value="${taxas || ''}" placeholder="0"></td>
+        <td class="valor">${valor !== null ? fmtBRL(valor) : '—'}</td>
+        <td>${row.flag ? `<span class="preview-flag">${escapeHtml(row.flag)}</span>` : ''}</td>
+      `;
+      body.appendChild(tr);
+});
+
+    body.querySelectorAll('.chk-include').forEach(el => el.addEventListener('change', (e) => {
+      pendingPreview[e.target.dataset.idx].include = e.target.checked;
+}));
+    body.querySelectorAll('.inp-localizador').forEach(el => el.addEventListener('input', (e) => {
+      pendingPreview[e.target.dataset.idx].localizador = e.target.value;
+}));
+    body.querySelectorAll('.inp-quantidade').forEach(el => el.addEventListener('input', (e) => {
+      const v = parseInt(e.target.value, 10);
+      pendingPreview[e.target.dataset.idx].quantidade = isNaN(v) ? null : v;
+      renderPreview();
+}));
+    body.querySelectorAll('.inp-milheiro').forEach(el => el.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      pendingPreview[e.target.dataset.idx].milheiro = isNaN(v) ? null : v;
+      renderPreview();
+}));
+    body.querySelectorAll('.inp-taxas').forEach(el => el.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      pendingPreview[e.target.dataset.idx].taxas = isNaN(v) ? 0 : v;
+      renderPreview();
+}));
+}
+
+  $('btn-limpar-extrato').addEventListener('click', () => {
+    $('import-texto').value = '';
+    pendingPreview = [];
+    pendingPreviewValor = [];
+    $('resultado-wrap').style.display = 'none';
+    renderPreview();
+    renderPreviewValor();
+    });
+
+  $('btn-cancelar-preview').addEventListener('click', () => {
+    pendingPreview = [];
+    renderPreview();
+    });
+
+  $('btn-confirmar-preview').addEventListener('click', async () => {
+    const pix = getPixConfigurado();
+    const selecionados = pendingPreview.filter(r => r.include && r.quantidade && r.milheiro);
+
+    if(selecionados.length === 0){
+      toast('Nenhum item válido selecionado');
+      return;
+}
+
+    await gerarRelatorio(selecionados, pix);
+});
+
+  // ---------- FECHAMENTO PELO VALOR INFORMADO NO EXTRATO ----------
+
+  function renderPreviewValor(){
+    const wrap = $('preview-wrap-valor');
+    const body = $('preview-body-valor');
+    body.innerHTML = '';
+
+    if(pendingPreviewValor.length === 0){
+      wrap.style.display = 'none';
+      return;
+}
+    wrap.style.display = 'block';
+
+    pendingPreviewValor.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="checkcol"><input type="checkbox" data-idx="${row.index}" class="chkv-include" ${row.include ? 'checked' : ''}></td>
+        <td><input type="text" class="mini-input inpv-localizador" data-idx="${row.index}" value="${escapeHtml(row.localizador)}"></td>
+        <td><input type="number" step="0.01" class="mini-input inpv-valor ${row.valor===null?'err':''}" data-idx="${row.index}" value="${row.valor !== null ? row.valor : ''}"></td>
+        <td>${row.flag ? `<span class="preview-flag">${escapeHtml(row.flag)}</span>` : ''}</td>
+      `;
+      body.appendChild(tr);
+});
+
+    body.querySelectorAll('.chkv-include').forEach(el => el.addEventListener('change', (e) => {
+      pendingPreviewValor[e.target.dataset.idx].include = e.target.checked;
+}));
+    body.querySelectorAll('.inpv-localizador').forEach(el => el.addEventListener('input', (e) => {
+      pendingPreviewValor[e.target.dataset.idx].localizador = e.target.value;
+}));
+    body.querySelectorAll('.inpv-valor').forEach(el => el.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      pendingPreviewValor[e.target.dataset.idx].valor = isNaN(v) ? null : v;
+      renderPreviewValor();
+}));
+}
+
+  $('btn-cancelar-preview-valor').addEventListener('click', () => {
+    pendingPreviewValor = [];
+    renderPreviewValor();
+    });
+
+  $('btn-confirmar-preview-valor').addEventListener('click', async () => {
+    const pix = getPixConfigurado();
+    const selecionados = pendingPreviewValor.filter(r => r.include && r.valor !== null);
+
+    if(selecionados.length === 0){
+      toast('Nenhum item válido selecionado');
+      return;
+}
+
+    await gerarRelatorioValor(selecionados, pix);
+});
+
+  async function gerarRelatorioValor(rows, pix){
+    const textoFornecedor = formatFornecedorReportPorValor(rows.map(r => ({
+      localizador: r.localizador, valor: r.valor
+})), pix);
+
+    $('resultado-texto').value = textoFornecedor;
+    $('resultado-wrap').style.display = 'block';
+    pendingPreviewValor = [];
+    renderPreviewValor();
+
+    const copiou = await copiarTexto(textoFornecedor);
+    toast(copiou ? 'Relatório copiado' : 'Relatório pronto — clique em "Copiar relatório" abaixo');
+    }
+
+  // ---------- MONTAGEM DO TEXTO DO RELATÓRIO ----------
+
+  // items: [{localizador, quantidade, milheiro, taxas}]
+  // O milheiro do resumo é a média ponderada pelas milhas (só o valor de milhas, sem taxas).
+  // As taxas pagas no cartão do fornecedor entram somadas no Valor final.
+  function formatFornecedorReport(items, pix){
+    if(!items || items.length === 0) return null;
+
+    const totalMilhas = items.reduce((s,i)=>s+i.quantidade, 0);
+    const totalCalcSemTaxas = items.reduce((s,i)=>s+((i.quantidade/1000)*i.milheiro), 0);
+    const totalTaxas = items.reduce((s,i)=>s+(i.taxas||0), 0);
+    const valorFinal = totalCalcSemTaxas + totalTaxas;
+    const milheiroMedio = totalMilhas > 0 ? (totalCalcSemTaxas / totalMilhas) * 1000 : 0;
+
+    let texto = 'Fechamento\n\n';
+    texto += `Número de emissões: ${items.length}\n\n`;
+    items.forEach((i, idx) => {
+      const loc = i.localizador ? i.localizador : `Localizador ${idx+1}`;
+      texto += `${loc} - ${fmtNum(i.quantidade)}\n`;
+});
+    texto += `\nTotal de milhas: ${fmtNum(totalMilhas)}\n`;
+    texto += `Milheiro: R$ ${milheiroMedio.toFixed(2).replace('.', ',')}\n`;
+    if(totalTaxas > 0){
+      texto += `Taxas (cartão fornecedor): ${fmtBRL(totalTaxas)}\n`;
+}
+    texto += `\nValor: \`${fmtBRL(valorFinal)}\`\n`;
+    texto += `Pix: \`${pix || ''}\`\n`;
+    texto += `\nConfirma?`;
+    return texto;
+}
+
+  // Fechamento pelo valor informado no extrato (soma direta, sem passar pelo milheiro).
+  // items: [{localizador, valor}]
+  function formatFornecedorReportPorValor(items, pix){
+    if(!items || items.length === 0) return null;
+
+    const totalValor = items.reduce((s,i)=>s+i.valor, 0);
+
+    let texto = 'Fechamento\n\n';
+    texto += `Número de emissões: ${items.length}\n\n`;
+    items.forEach((i, idx) => {
+      const loc = i.localizador ? i.localizador : `Localizador ${idx+1}`;
+      texto += `${loc} - ${fmtBRL(i.valor)}\n`;
+});
+    texto += `\nValor: \`${fmtBRL(totalValor)}\`\n`;
+    texto += `Pix: \`${pix || ''}\`\n`;
+    texto += `\nConfirma?`;
+    return texto;
+}
+
+  loadConfig();
+})();
+</script>
+</body>
+</html>
