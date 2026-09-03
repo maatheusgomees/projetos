@@ -112,9 +112,10 @@
   }
 
   .topbar{
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 28px;
   }
 
@@ -127,13 +128,15 @@
     font-weight: 500;
     cursor: pointer;
     padding: 4px 0;
-    flex-shrink: 0;
+    justify-self: start;
   }
   .back-btn:hover{ color: var(--brand-dark); }
 
   .topbar h1{
+    grid-column: 2;
     font-size: 24px;
     margin: 0;
+    text-align: center;
   }
 
   .list{
@@ -363,9 +366,11 @@
   function buildPerfumes(rows){
     if (rows.length < 2) return [];
     const header = rows[0].map(h => h.trim().toLowerCase());
-    // Coluna A = fabricante/marca, coluna B = nome do perfume (posição fixa).
-    const idxMarca = 0;
-    const idxNome = 1;
+    // Detecta pelas colunas do cabeçalho (Perfume, Marca); se não achar, usa a posição padrão A=Perfume, B=Marca.
+    let idxNome = header.indexOf("perfume");
+    let idxMarca = header.indexOf("marca");
+    if (idxNome === -1) idxNome = 0;
+    if (idxMarca === -1) idxMarca = 1;
     const idxSizes = {};
     SIZE_COLS.forEach(s => { idxSizes[s] = header.indexOf(s + "ml"); });
 
@@ -414,7 +419,7 @@
   }
 
   function formatBRL(v){
-    return "R$ " + v.toFixed(2).replace(".", ",");
+    return "R$ " + v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   let currentView = "home"; // "home" | "brand"
