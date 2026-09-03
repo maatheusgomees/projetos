@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Perfumes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #FAF5EF;
+    --ink: #26191B;
+    --muted: #8A7A72;
+    --line: #E6DACB;
+    --wine: #8A3546;
+    --wine-dark: #6E2A38;
+    --gold: #B4864A;
+    --chip-bg: #F1E6D8;
+    --chip-bg-hover: #E9DAC5;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 40px 20px 140px;
+  }
+
+  .hero{
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .hero svg{
+    width: 46px;
+    height: auto;
+    margin-bottom: 14px;
+    color: var(--wine);
+  }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 32px;
+    margin: 0 0 8px;
+    letter-spacing: 0.2px;
+  }
+
+  .hero p{
+    color: var(--muted);
+    font-size: 14.5px;
+    margin: 0;
+    line-height: 1.5;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+
+  .brand-list{
+    border-top: 1px solid var(--line);
+  }
+
+  .brand-row{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 20px 2px;
+    font-family: 'Inter', sans-serif;
+    text-align: left;
+    cursor: pointer;
+  }
+  .brand-row:hover .brand-row-name{ color: var(--wine); }
+
+  .brand-row-name{
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    transition: color .15s ease;
+  }
+
+  .brand-row-count{
+    color: var(--muted);
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .brand-row-right{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chev{
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .topbar{
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .back-btn{
+    background: none;
+    border: none;
+    color: var(--wine);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 0;
+    flex-shrink: 0;
+  }
+  .back-btn:hover{ color: var(--wine-dark); }
+
+  .topbar h1{
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .list{
+    border-top: 1px solid var(--line);
+  }
+
+  .item{
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .item-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .item-name{
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .item-brand{
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .item-subtotal{
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--gold);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity .15s ease;
+  }
+  .item-subtotal.visible{ opacity: 1; }
+
+  .sizes{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+
+  .size-btn{
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    background: var(--chip-bg);
+    border: 1px solid transparent;
+    color: var(--ink);
+    padding: 8px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .15s ease;
+    line-height: 1.3;
+  }
+  .size-btn:hover{ background: var(--chip-bg-hover); }
+  .size-btn .p{ display:block; font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .size-btn.selected{
+    background: var(--wine);
+    color: #fff;
+  }
+  .size-btn.selected .p{ color: #E9C9CF; }
+
+  .qty-row{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all .2s ease;
+  }
+  .qty-row.visible{
+    max-height: 60px;
+    opacity: 1;
+    margin-top: 14px;
+  }
+
+  .qty-label{ font-size: 13px; color: var(--muted); }
+
+  .qty-stepper{
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .qty-stepper button{
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    color: var(--wine);
+    cursor: pointer;
+  }
+  .qty-stepper button:hover{ background: var(--chip-bg); }
+  .qty-stepper span{
+    width: 30px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .status-msg{
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 40px 10px;
+  }
+
+  .footer-note{
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 30px;
+    line-height: 1.6;
+  }
+
+  .bar{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink);
+    color: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .bar-info{ font-size: 13px; }
+  .bar-info .count{
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .bar-info .total{ color: #C9B6AB; }
+
+  .bar button{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    background: var(--wine);
+    color: #fff;
+    border: none;
+    padding: 13px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s ease;
+  }
+  .bar button:hover:not(:disabled){ background: var(--wine-dark); }
+  .bar button:disabled{
+    background: #4A3B3D;
+    color: #93807D;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="content"></div>
+</div>
+
+<div class="bar">
+  <div class="bar-info">
+    <span class="count" id="barCount">Nenhum item selecionado</span>
+    <span class="total" id="barTotal"></span>
+  </div>
+  <button id="sendBtn" disabled>Enviar pedido</button>
+</div>
+
+<script>
+  const WHATSAPP_NUMBER = "5521974664145";
+
+  // Catálogo é lido direto da planilha publicada (Perfume, Marca, 2ml, 3ml, 5ml, 10ml).
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9nzib-5aeJdQmU-mFKWNDCRfGGCmKiF1zkDo7o-WnZBoktdY7Ok7e_LCSW1c4VFeiFuMG6R73StT/pub?output=csv";
+  const SIZE_COLS = [2, 3, 5, 10];
+
+  let perfumes = [];
+  const state = {}; // { [id]: { size, qty } }
+
+  function parseCSV(text){
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++){
+      const char = text[i];
+      if (inQuotes){
+        if (char === '"'){
+          if (text[i + 1] === '"'){ field += '"'; i++; }
+          else inQuotes = false;
+        } else field += char;
+      } else {
+        if (char === '"') inQuotes = true;
+        else if (char === ","){ row.push(field); field = ""; }
+        else if (char === "\n" || char === "\r"){
+          if (char === "\r" && text[i + 1] === "\n") i++;
+          row.push(field); field = "";
+          if (row.some(c => c.trim() !== "")) rows.push(row);
+          row = [];
+        } else field += char;
+      }
+    }
+    if (field !== "" || row.length){ row.push(field); if (row.some(c => c.trim() !== "")) rows.push(row); }
+    return rows;
+  }
+
+  function parsePrice(str){
+    if (!str) return null;
+    let cleaned = str.replace(/[^\d,.]/g, "").trim();
+    if (!cleaned) return null;
+    if (cleaned.includes(",")) cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+    const val = parseFloat(cleaned);
+    return isNaN(val) ? null : val;
+  }
+
+  function buildPerfumes(rows){
+    if (rows.length < 2) return [];
+    const header = rows[0].map(h => h.trim().toLowerCase());
+    const idxNome = header.indexOf("perfume");
+    const idxMarca = header.indexOf("marca");
+    const idxSizes = {};
+    SIZE_COLS.forEach(s => { idxSizes[s] = header.indexOf(s + "ml"); });
+
+    const list = [];
+    for (let i = 1; i < rows.length; i++){
+      const r = rows[i];
+      const nome = idxNome >= 0 ? (r[idxNome] || "").trim() : "";
+      if (!nome) continue;
+      const marca = idxMarca >= 0 ? (r[idxMarca] || "").trim() : "";
+      const precos = {};
+      SIZE_COLS.forEach(s => {
+        const idx = idxSizes[s];
+        if (idx === undefined || idx === -1) return;
+        const val = parsePrice(r[idx]);
+        if (val !== null) precos[s] = val;
+      });
+      if (Object.keys(precos).length === 0) continue;
+      list.push({ id: i, nome, marca, precos });
+    }
+    return list;
+  }
+
+  async function loadCatalog(){
+    const content = document.getElementById("content");
+    content.innerHTML = '<p class="status-msg">Carregando catálogo…</p>';
+    try {
+      const sep = CSV_URL.includes("?") ? "&" : "?";
+      const res = await fetch(CSV_URL + sep + "_=" + Date.now());
+      if (!res.ok) throw new Error("network");
+      const text = await res.text();
+      perfumes = buildPerfumes(parseCSV(text));
+      if (perfumes.length === 0){
+        content.innerHTML = '<p class="status-msg">Nenhum perfume encontrado na planilha.</p>';
+        return;
+      }
+      render();
+    } catch (e){
+      content.innerHTML = '<p class="status-msg">Não foi possível carregar o catálogo agora. Tente novamente em instantes.</p>';
+    }
+  }
+
+  function getBrands(){
+    const seen = [];
+    perfumes.forEach(p => { if (p.marca && !seen.includes(p.marca)) seen.push(p.marca); });
+    return seen;
+  }
+
+  function formatBRL(v){
+    return "R$ " + v.toFixed(2).replace(".", ",");
+  }
+
+  let currentView = "home"; // "home" | "brand"
+  let currentBrand = null;
+
+  function itemHtml(p){
+    const sel = state[p.id];
+    const sizesHtml = Object.entries(p.precos).map(([ml, preco]) => {
+      const isSel = sel && sel.size == ml;
+      return `<button class="size-btn${isSel ? " selected" : ""}" data-id="${p.id}" data-size="${ml}">
+                ${ml}ml<span class="p">${formatBRL(preco)}</span>
+              </button>`;
+    }).join("");
+
+    const subtotal = sel ? p.precos[sel.size] * sel.qty : 0;
+
+    return `
+      <div class="item">
+        <div class="item-head">
+          <div class="item-name">${p.nome}</div>
+          <div class="item-subtotal${sel ? " visible" : ""}">${formatBRL(subtotal)}</div>
+        </div>
+        <div class="sizes">${sizesHtml}</div>
+        <div class="qty-row${sel ? " visible" : ""}">
+          <span class="qty-label">Quantidade</span>
+          <div class="qty-stepper">
+            <button data-id="${p.id}" data-action="dec">−</button>
+            <span>${sel ? sel.qty : 1}</span>
+            <button data-id="${p.id}" data-action="inc">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachItemListeners(container){
+    container.querySelectorAll(".size-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        const size = Number(btn.dataset.size);
+        if (state[id] && state[id].size === size) {
+          delete state[id];
+        } else {
+          state[id] = { size, qty: state[id] ? state[id].qty : 1 };
+        }
+        render();
+      });
+    });
+
+    container.querySelectorAll(".qty-stepper button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = Number(btn.dataset.id);
+        if (!state[id]) return;
+        if (btn.dataset.action === "inc" && state[id].qty < 20) state[id].qty++;
+        if (btn.dataset.action === "dec" && state[id].qty > 1) state[id].qty--;
+        render();
+      });
+    });
+  }
+
+  function renderHome(content){
+    const brands = getBrands();
+    content.innerHTML = `
+      <div class="hero">
+        <svg viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4">
+          <rect x="12" y="4" width="16" height="9" rx="1.5"/>
+          <path d="M14 13 L14 20 Q14 22 12 24 L12 55 Q12 58 15 58 L25 58 Q28 58 28 55 L28 24 Q26 22 26 20 L26 13" stroke-linejoin="round"/>
+          <line x1="12" y1="34" x2="28" y2="34"/>
+        </svg>
+        <h1>Catálogo de Perfumes</h1>
+        <p>Escolha uma marca para ver os perfumes disponíveis.</p>
+      </div>
+      <div class="brand-list">
+        ${brands.map((b, i) => {
+          const count = perfumes.filter(p => p.marca === b).length;
+          return `<button class="brand-row" data-idx="${i}">
+                    <span class="brand-row-name">${b}</span>
+                    <span class="brand-row-right">
+                      <span class="brand-row-count">${count} ${count === 1 ? "perfume" : "perfumes"}</span>
+                      <span class="chev">›</span>
+                    </span>
+                  </button>`;
+        }).join("")}
+      </div>
+    `;
+
+    content.querySelectorAll(".brand-row").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentBrand = brands[Number(btn.dataset.idx)];
+        currentView = "brand";
+        render();
+        window.scrollTo(0, 0);
+      });
+    });
+  }
+
+  function renderBrandView(content){
+    const items = perfumes.filter(p => p.marca === currentBrand);
+    content.innerHTML = `
+      <div class="topbar">
+        <button class="back-btn" id="backBtn">← Marcas</button>
+        <h1>${currentBrand}</h1>
+      </div>
+      <div class="list">${items.map(itemHtml).join("")}</div>
+      <p class="footer-note">Os valores exibidos são por unidade, no tamanho selecionado.</p>
+    `;
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      currentView = "home";
+      currentBrand = null;
+      render();
+      window.scrollTo(0, 0);
+    });
+
+    attachItemListeners(content);
+  }
+
+  function render(){
+    const content = document.getElementById("content");
+    if (currentView === "brand" && currentBrand){
+      renderBrandView(content);
+    } else {
+      renderHome(content);
+    }
+    updateBar();
+  }
+
+  function updateBar(){
+    const entries = Object.entries(state);
+    const barCount = document.getElementById("barCount");
+    const barTotal = document.getElementById("barTotal");
+    const sendBtn = document.getElementById("sendBtn");
+
+    if (entries.length === 0){
+      barCount.textContent = "Nenhum item selecionado";
+      barTotal.textContent = "";
+      sendBtn.disabled = true;
+      return;
+    }
+
+    let totalItens = 0;
+    let totalValor = 0;
+    entries.forEach(([id, sel]) => {
+      const p = perfumes.find(x => x.id == id);
+      totalItens += sel.qty;
+      totalValor += p.precos[sel.size] * sel.qty;
+    });
+
+    barCount.textContent = `${entries.length} ${entries.length === 1 ? "perfume" : "perfumes"} · ${totalItens} ${totalItens === 1 ? "un." : "un."}`;
+    barTotal.textContent = formatBRL(totalValor);
+    sendBtn.disabled = false;
+  }
+
+  document.getElementById("sendBtn").addEventListener("click", () => {
+    const entries = Object.entries(state);
+    if (entries.length === 0) return;
+
+    let linhas = ["Olá! Gostaria de fazer o seguinte pedido:", ""];
+    let total = 0;
+
+    entries.forEach(([id, sel]) => {
+      const p = perfumes.find(x => x.id == id);
+      const preco = p.precos[sel.size];
+      const subtotal = preco * sel.qty;
+      total += subtotal;
+      linhas.push(`- ${p.nome} (${p.marca}) — ${sel.size}ml x${sel.qty} — ${formatBRL(subtotal)}`);
+    });
+
+    linhas.push("");
+    linhas.push(`Total: ${formatBRL(total)}`);
+
+    const texto = encodeURIComponent(linhas.join("\n"));
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${texto}`, "_blank");
+  });
+
+  loadCatalog();
+</script>
+
+</body>
+</html>
