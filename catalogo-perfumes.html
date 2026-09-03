@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -318,7 +319,7 @@
 <script>
   const WHATSAPP_NUMBER = "5521974664145";
 
-  // Catálogo é lido direto da planilha publicada (Perfume, Marca, 2ml, 3ml, 5ml, 10ml).
+  // Catálogo é lido direto da planilha publicada (Fabricante, Perfume, 2ml, 3ml, 5ml, 10ml).
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9nzib-5aeJdQmU-mFKWNDCRfGGCmKiF1zkDo7o-WnZBoktdY7Ok7e_LCSW1c4VFeiFuMG6R73StT/pub?output=csv";
   const SIZE_COLS = [2, 3, 5, 10];
 
@@ -362,17 +363,18 @@
   function buildPerfumes(rows){
     if (rows.length < 2) return [];
     const header = rows[0].map(h => h.trim().toLowerCase());
-    const idxNome = header.indexOf("perfume");
-    const idxMarca = header.indexOf("marca");
+    // Coluna A = fabricante/marca, coluna B = nome do perfume (posição fixa).
+    const idxMarca = 0;
+    const idxNome = 1;
     const idxSizes = {};
     SIZE_COLS.forEach(s => { idxSizes[s] = header.indexOf(s + "ml"); });
 
     const list = [];
     for (let i = 1; i < rows.length; i++){
       const r = rows[i];
-      const nome = idxNome >= 0 ? (r[idxNome] || "").trim() : "";
+      const nome = (r[idxNome] || "").trim();
       if (!nome) continue;
-      const marca = idxMarca >= 0 ? (r[idxMarca] || "").trim() : "";
+      const marca = (r[idxMarca] || "").trim();
       const precos = {};
       SIZE_COLS.forEach(s => {
         const idx = idxSizes[s];
@@ -593,3 +595,4 @@
 
 </body>
 </html>
+```
