@@ -457,6 +457,32 @@
     return div.innerHTML;
   }
 
+  // Remove linhas em branco *dentro* de cada extrato e a linha "Compra"
+  // (referência interna, irrelevante pro fechamento), mas preserva uma quebra
+  // de linha entre um extrato e outro (cada novo "Localizador:" inicia um bloco).
+  function limparExtrato(text){
+    if(!text) return '';
+    const linhas = text.split('\n')
+      .map(l => l.trim())
+      .filter(l => l !== '')
+      .filter(l => !/^compra\b/i.test(l));
+
+    const resultado = [];
+    linhas.forEach((linha, idx) => {
+      if(idx > 0 && /^localizador\b/i.test(linha)){
+        resultado.push('');
+      }
+      resultado.push(linha);
+    });
+    return resultado.join('\n');
+  }
+
+  $('import-texto').addEventListener('paste', () => {
+    setTimeout(() => {
+      $('import-texto').value = limparExtrato($('import-texto').value);
+    }, 0);
+  });
+
   // ---------- IMPORTAÇÃO / PARSER DE EXTRATO ----------
 
   function splitBlocks(text){
@@ -593,7 +619,8 @@
   }
 
   $('btn-processar-extrato').addEventListener('click', async () => {
-    const text = $('import-texto').value.trim();
+    const text = limparExtrato($('import-texto').value);
+    $('import-texto').value = text;
     if(!text){ toast('Cole um extrato primeiro'); return; }
 
     const milheiroConfigurado = getMilheiroConfigurado();
@@ -619,7 +646,8 @@
   });
 
   $('btn-processar-valor').addEventListener('click', async () => {
-    const text = $('import-texto').value.trim();
+    const text = limparExtrato($('import-texto').value);
+    $('import-texto').value = text;
     if(!text){ toast('Cole um extrato primeiro'); return; }
 
     const pix = getPixConfigurado();
