@@ -209,6 +209,8 @@
   .qty-row{
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    row-gap: 8px;
     gap: 14px;
     margin-top: 14px;
     max-height: 0;
@@ -217,9 +219,19 @@
     transition: all .2s ease;
   }
   .qty-row.visible{
-    max-height: 60px;
+    max-height: 90px;
     opacity: 1;
     margin-top: 14px;
+  }
+
+  .frasco-tag{
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--chip-bg);
+    padding: 4px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
   }
 
   .qty-label{ font-size: 13px; color: var(--muted); }
@@ -365,12 +377,13 @@
 
   function buildPerfumes(rows){
     if (rows.length < 2) return [];
-    const header = rows[0].map(h => h.trim().toLowerCase());
-    // Detecta pelas colunas do cabeçalho (Perfume, Marca); se não achar, usa a posição padrão A=Perfume, B=Marca.
+    const header = rows[0].map(h => h.trim().toLowerCase().replace(/:$/, ""));
+    // Detecta pelas colunas do cabeçalho; se não achar, usa a posição padrão A=Perfume, B=Marca.
     let idxNome = header.indexOf("perfume");
     let idxMarca = header.indexOf("marca");
     if (idxNome === -1) idxNome = 0;
     if (idxMarca === -1) idxMarca = 1;
+    const idxFrasco = header.indexOf("frasco");
     const idxSizes = {};
     SIZE_COLS.forEach(s => { idxSizes[s] = header.indexOf(s + "ml"); });
 
@@ -380,6 +393,7 @@
       const nome = (r[idxNome] || "").trim();
       if (!nome) continue;
       const marca = (r[idxMarca] || "").trim();
+      const frasco = idxFrasco !== -1 ? (r[idxFrasco] || "").trim() : "";
       const precos = {};
       SIZE_COLS.forEach(s => {
         const idx = idxSizes[s];
@@ -388,7 +402,7 @@
         if (val !== null) precos[s] = val;
       });
       if (Object.keys(precos).length === 0) continue;
-      list.push({ id: i, nome, marca, precos });
+      list.push({ id: i, nome, marca, frasco, precos });
     }
     return list;
   }
@@ -435,6 +449,7 @@
     }).join("");
 
     const subtotal = sel ? p.precos[sel.size] * sel.qty : 0;
+    const frascoHtml = (sel && p.frasco) ? `<span class="frasco-tag">Frasco ${p.frasco}</span>` : "";
 
     return `
       <div class="item">
@@ -450,6 +465,7 @@
             <span>${sel ? sel.qty : 1}</span>
             <button data-id="${p.id}" data-action="inc">+</button>
           </div>
+          ${frascoHtml}
         </div>
       </div>
     `;
@@ -580,7 +596,7 @@
       const preco = p.precos[sel.size];
       const subtotal = preco * sel.qty;
       total += subtotal;
-      linhas.push(`- ${p.nome} (${p.marca}) — ${sel.size}ml x${sel.qty} — ${formatBRL(subtotal)}`);
+      linhas.push(`- ${p.nome} (${p.marca}) — ${sel.size}ml x${sel.qty}${p.frasco ? " — Frasco " + p.frasco : ""} — ${formatBRL(subtotal)}`);
     });
 
     linhas.push("");
