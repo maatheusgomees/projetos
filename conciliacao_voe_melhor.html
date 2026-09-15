@@ -187,10 +187,29 @@
 // ─── ESTADO DOS MESES ─────────────────────────────────────────
 // Cada entrada: { label: "Julho 2026", short: "Jul", mp: true, itau: true }
 // O nome da aba é montado como: "{label} Mercado Pago" e "{label} Itaú"
-let months = [
-  { label: "Julho 2026",  short: "Jul", mp: true,  itau: true },
-  { label: "Agosto 2026", short: "Ago", mp: true,  itau: true },
+
+const STORAGE_KEY = 'voeMelhor_months';
+const DEFAULT_MONTHS = [
+  { label: "Julho 2026",  short: "Jul", mp: true, itau: true },
+  { label: "Agosto 2026", short: "Ago", mp: true, itau: true },
 ];
+
+function loadMonths() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e) {}
+  return DEFAULT_MONTHS.map(m => ({ ...m }));
+}
+
+function saveMonths() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(months)); } catch(e) {}
+}
+
+let months = loadMonths();
 
 // Paleta de cores para os badges (cicla conforme novos meses são adicionados)
 const BADGE_COLORS = [
@@ -239,6 +258,7 @@ function renderMonths() {
 
 function toggleBank(idx, bank) {
   months[idx][bank] = !months[idx][bank];
+  saveMonths();
   renderMonths();
 }
 
@@ -254,11 +274,13 @@ function addMonth() {
   }
   months.push({ label, short: getShortLabel(label), mp: true, itau: true });
   input.value = '';
+  saveMonths();
   renderMonths();
 }
 
 function removeMonth(idx) {
   months.splice(idx, 1);
+  saveMonths();
   renderMonths();
 }
 
