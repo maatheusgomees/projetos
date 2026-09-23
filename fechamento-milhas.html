@@ -544,12 +544,17 @@
 
   // Remove linhas em branco *dentro* de cada extrato e as linhas "Compra",
   // "CPFs utilizados", "Link", "Detalhes do pagamento" e "Conta" (referências
-  // internas, irrelevantes pro fechamento), mas preserva uma quebra de linha
-  // entre um extrato e outro (cada novo "Localizador:" inicia um bloco).
+  // internas, irrelevantes pro fechamento), além dos trechos "valor integral -
+  // BRL" e "taxas inclusas" dentro das linhas de valor, mas preserva uma quebra
+  // de linha entre um extrato e outro (cada novo "Localizador:" inicia um bloco).
   function limparExtrato(text){
     if(!text) return '';
     const linhas = text.split('\n')
       .map(l => l.trim())
+      .map(l => l
+        .replace(/\s*-\s*valor\s+integral\s*-\s*brl\b/i, '')
+        .replace(/\s*-\s*taxas\s+inclusas\b/i, '')
+        .trim())
       .filter(l => l !== '')
       .filter(l => !/^compra\b/i.test(l))
       .filter(l => !/^cpfs?\s+utilizados?\b/i.test(l))
