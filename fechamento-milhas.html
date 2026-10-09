@@ -217,6 +217,39 @@
   }
   .mini-input.err{border-color:var(--red);background:var(--err-bg);}
 
+
+  /* Alerta de localizador duplicado */
+  .dup-alert{
+    display:none;
+    margin-top:12px;
+    padding:14px 16px;
+    border:2px solid var(--red);
+    border-left-width:8px;
+    border-radius:6px;
+    background:var(--err-bg);
+    color:var(--ink);
+  }
+  .dup-alert.show{display:block;animation:dupShake .45s ease;}
+  .dup-alert .dup-title{
+    display:flex;align-items:center;gap:8px;
+    font-weight:700;font-size:15px;color:var(--red);
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  .dup-alert .dup-title::before{content:"\26A0";font-size:20px;}
+  .dup-alert p{margin:6px 0 0;font-size:14px;line-height:1.45;}
+  .dup-alert .dup-codes{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;}
+  .dup-alert .dup-code{
+    font-family:'IBM Plex Mono', monospace;font-weight:700;font-size:13px;
+    background:var(--red);color:#fff;padding:3px 9px;border-radius:4px;
+  }
+  textarea.has-dup{border-color:var(--red);box-shadow:0 0 0 3px rgba(179,73,47,.25);}
+  @keyframes dupShake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-6px);}
+    40%{transform:translateX(6px);}
+    60%{transform:translateX(-4px);}
+    80%{transform:translateX(4px);}
+  }
   .toast{
     position:fixed;
     bottom:18px;left:50%;
@@ -354,6 +387,7 @@
         <label for="import-texto">Extrato colado</label>
         <textarea id="import-texto" placeholder="Localizador: AUMPUV&#10;Pontos: 139.900 * 15.00&#10;Total sem taxas: R$ 2.098,50"></textarea>
       </div>
+      <div id="dup-alert" class="dup-alert" role="alert" aria-live="assertive"></div>
 
       <div class="field" style="max-width:220px;margin-top:14px;">
         <label for="config-desconto">Desconto (R$)</label>
@@ -713,10 +747,68 @@
     };
   }
 
+
+  // ---------- ALERTA DE LOCALIZADOR DUPLICADO ----------
+  // Retorna os localizadores que aparecem em mais de um extrato colado
+  // (comparação sem diferenciar maiúsculas/minúsculas), com a contagem.
+  function detectarDuplicados(rawText){
+    const text = limparExtrato(rawText || '');
+    if(!text) return [];
+    const contagem = {};
+    splitBlocks(text).forEach(b => {
+      const loc = parseBlock(b).localizador;
+      if(loc){
+        const k = loc.toUpperCase();
+        contagem[k] = (contagem[k] || 0) + 1;
+      }
+    });
+    return Object.keys(contagem)
+      .filter(k => contagem[k] > 1)
+      .map(k => ({ localizador: k, vezes: contagem[k] }));
+  }
+
+  function atualizarAlertaDuplicado(opts){
+    const box = $('dup-alert');
+    const ta = $('import-texto');
+    const dups = detectarDuplicados(ta.value);
+    const jaVisivel = box.classList.contains('show');
+    if(!dups.length){
+      box.classList.remove('show');
+      box.innerHTML = '';
+      ta.classList.remove('has-dup');
+      return dups;
+    }
+    const n = dups.length;
+    box.innerHTML =
+      '<div class="dup-title">Localizador duplicado!</div>' +
+      '<p>' + (n === 1 ? 'Este localizador aparece' : 'Estes localizadores aparecem') +
+      ' mais de uma vez no extrato colado. Confira se não é cobrança em dobro antes de gerar o relatório.</p>' +
+      '<div class="dup-codes">' +
+      dups.map(d => '<span class="dup-code">' + escapeHtml(d.localizador) + ' (' + d.vezes + '\u00d7)</span>').join('') +
+      '</div>';
+    ta.classList.add('has-dup');
+    // Reinicia a animação quando a lista de duplicados muda ou quando forçado
+    if(!jaVisivel || (opts && opts.destacar)){
+      box.classList.remove('show');
+      void box.offsetWidth;
+    }
+    box.classList.add('show');
+    if(opts && opts.destacar){
+      box.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+    return dups;
+  }
+
+  $('import-texto').addEventListener('input', () => atualizarAlertaDuplicado());
+  $('import-texto').addEventListener('paste', () => setTimeout(() => atualizarAlertaDuplicado(), 10));
+
   $('btn-processar-extrato').addEventListener('click', async () => {
     const text = limparExtrato($('import-texto').value);
     $('import-texto').value = text;
     if(!text){ toast('Cole um extrato primeiro'); return; }
+    if(atualizarAlertaDuplicado({destacar:true}).length){
+      toast('\u26A0 Localizador duplicado no extrato!');
+    }
 
     const milheiroConfigurado = getMilheiroConfigurado();
     const pix = getPixConfigurado();
@@ -744,6 +836,9 @@
     const text = limparExtrato($('import-texto').value);
     $('import-texto').value = text;
     if(!text){ toast('Cole um extrato primeiro'); return; }
+    if(atualizarAlertaDuplicado({destacar:true}).length){
+      toast('\u26A0 Localizador duplicado no extrato!');
+    }
 
     const pix = getPixConfigurado();
     const blocks = splitBlocks(text);
@@ -868,6 +963,7 @@
 
   $('btn-limpar-extrato').addEventListener('click', () => {
     $('import-texto').value = '';
+    atualizarAlertaDuplicado();
     $('config-milheiro').value = '';
     $('config-pix').value = '';
     $('config-desconto').value = '';
