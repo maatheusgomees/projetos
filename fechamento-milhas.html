@@ -391,7 +391,7 @@
 
       <div class="field" style="max-width:220px;margin-top:14px;">
         <label for="config-desconto">Desconto (R$)</label>
-        <input type="number" id="config-desconto" placeholder="0,00" step="0.01" min="0">
+        <input type="text" inputmode="decimal" autocomplete="off" id="config-desconto" placeholder="0,00">
       </div>
       <p class="card-note" style="margin-top:6px;">Use para abater valor enviado a mais, localizador pago e depois cancelado, ou qualquer outro ajuste. O desconto é subtraído do valor final do relatório.</p>
 
@@ -563,9 +563,15 @@
     return $('config-pix').value.trim();
   }
   function getDescontoConfigurado(){
-    const v = parseFloat($('config-desconto').value);
-    return isNaN(v) || v < 0 ? 0 : v;
+    const v = parseNumberBR($('config-desconto').value);
+    return v === null || v < 0 ? 0 : v;
   }
+  // Ao sair do campo, reformata no padrão brasileiro (ex.: 1495,49 -> 1.495,49)
+  $('config-desconto').addEventListener('blur', () => {
+    const el = $('config-desconto');
+    const v = parseNumberBR(el.value);
+    el.value = (v === null || v < 0) ? '' : v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  });
 
   $('config-milheiro').addEventListener('change', saveConfig);
   $('config-pix').addEventListener('change', saveConfig);
