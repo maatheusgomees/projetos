@@ -381,7 +381,7 @@
       <span class="tag">Leitura automática</span>
     </div>
     <div class="card-body">
-      <p class="card-note">Cole abaixo a mensagem (ou várias seguidas) com localizador, quantidade de pontos e milheiro. Se estiver tudo certo, um clique em "Processar extrato" já devolve o relatório pronto pra copiar.</p>
+      <p class="card-note">Cole abaixo a mensagem (ou várias seguidas) com localizador, quantidade de pontos e milheiro. Se houver a linha "Total com taxas", esse valor entra na somatória final. Se estiver tudo certo, um clique em "Processar extrato" já devolve o relatório pronto pra copiar.</p>
 
       <div class="field grow">
         <label for="import-texto">Extrato colado</label>
@@ -638,9 +638,17 @@
     let totalSemTaxas = null;
     let taxas = null;
     let totalGeral = null;
+    let totalComTaxas = null;
 
     lines.forEach(line => {
       let m;
+
+      // "Total com taxas: R$ 1.234,56" — valor final já com as taxas inclusas.
+      // Tem prioridade sobre os demais totais e entra direto na somatória final.
+      if(totalComTaxas === null && (m = line.match(/total\s*com\s*taxas[^\d\n]*([\d.,]*\d)/i))){
+        totalComTaxas = parseNumberBR(m[1]);
+        return;
+      }
 
       if(localizador === null && (m = line.match(/^localizador[:\-\s]*([A-Z0-9]{4,10})/i))){
         localizador = m[1].trim();
@@ -695,17 +703,31 @@
     // total (seja "Total", "Total sem taxas" ou "Valor com taxas") — sem somar nada por
     // cima, já que cada fornecedor rotula esse campo de um jeito diferente.
     let valorInformado = null;
-    if(totalGeral !== null){
+    if(totalComTaxas !== null){
+      valorInformado = totalComTaxas;
+    } else if(totalGeral !== null){
       valorInformado = totalGeral;
     } else if(totalSemTaxas !== null){
       valorInformado = totalSemTaxas;
     }
 
     return {
-      localizador, quantidade, milheiro, taxas,
+      localizador, quantidade, milheiro, taxas, totalComTaxas,
       referencia, referenciaAmbigua, valorInformado,
       raw: block
     };
+  }
+
+  function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+  // Quando o extrato traz "Total com taxas", esse valor é o que vale na somatória final:
+  // as taxas do item passam a ser a diferença entre ele e o valor das milhas (qtd × milheiro).
+  // Se o usuário editar as taxas à mão na conferência, a edição dele prevalece.
+  function recalcTaxasDerivadas(row){
+    if(row.totalComTaxas === null || row.totalComTaxas === undefined || row.taxasManual) return;
+    if(row.quantidade && row.milheiro !== null && row.milheiro !== undefined && !isNaN(row.milheiro)){
+      row.taxas = round2(row.totalComTaxas - (row.quantidade/1000)*row.milheiro);
+    }
   }
 
   function buildPreviewRow(parsed, index, milheiroConfigurado){
@@ -727,15 +749,22 @@
         ? `Total do extrato (${fmtBRL(parsed.referencia)}) difere do calculado — confira se inclui taxas`
         : `Total sem taxas do extrato (${fmtBRL(parsed.referencia)}) difere do calculado`;
     }
-    return {
+    const row = {
       index,
       localizador: parsed.localizador || '',
       quantidade: quantidade,
       milheiro: milheiro,
       taxas: parsed.taxas !== null && parsed.taxas !== undefined ? parsed.taxas : 0,
+      totalComTaxas: parsed.totalComTaxas,
+      taxasManual: false,
       flag,
       include: quantidade !== null
     };
+    recalcTaxasDerivadas(row);
+    if(!flag && row.totalComTaxas !== null && row.taxas < -0.02){
+      row.flag = `"Total com taxas" do extrato (${fmtBRL(row.totalComTaxas)}) é menor que o valor das milhas calculado — confira o milheiro`;
+    }
+    return row;
   }
 
   // Fechamento pelo valor informado no extrato (soma direta, sem passar pelo milheiro).
@@ -953,16 +982,19 @@
     body.querySelectorAll('.inp-quantidade').forEach(el => el.addEventListener('input', (e) => {
       const v = parseInt(e.target.value, 10);
       pendingPreview[e.target.dataset.idx].quantidade = isNaN(v) ? null : v;
+      recalcTaxasDerivadas(pendingPreview[e.target.dataset.idx]);
       renderPreview();
     }));
     body.querySelectorAll('.inp-milheiro').forEach(el => el.addEventListener('input', (e) => {
       const v = parseFloat(e.target.value);
       pendingPreview[e.target.dataset.idx].milheiro = isNaN(v) ? null : v;
+      recalcTaxasDerivadas(pendingPreview[e.target.dataset.idx]);
       renderPreview();
     }));
     body.querySelectorAll('.inp-taxas').forEach(el => el.addEventListener('input', (e) => {
       const v = parseFloat(e.target.value);
       pendingPreview[e.target.dataset.idx].taxas = isNaN(v) ? 0 : v;
+      pendingPreview[e.target.dataset.idx].taxasManual = true;
       renderPreview();
     }));
   }
